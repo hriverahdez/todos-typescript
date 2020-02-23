@@ -9,7 +9,7 @@
     <div v-if="loading">Loading...</div>
     <ul v-else>
       <li data-test="todo-item" v-for="todo of (showDoneOnly ? doneTodos : todos)" :key="todo.id">
-        <TodoItem :todo="todo" />
+        <TodoItem :todo="todo" @todo:toggle="onTodoToggled" />
       </li>
     </ul>
   </div>
@@ -24,11 +24,12 @@ import {
   MODULE_NAME as TODOS_MODULE_NAME,
   ActionTypes,
   TodosModuleState,
-  GetterTypes
+  GetterTypes,
+  MutationTypes
 } from "@/store/todos";
+
 import { Todo } from "@/models";
 import { RootModuleState } from "../store";
-import { Action } from "vuex";
 import TodoItem from "./TodoItem.vue";
 
 const todosModule = namespace(TODOS_MODULE_NAME);
@@ -46,8 +47,13 @@ export default class TodoListComponent extends Vue {
 
   @todosModule.State loading!: boolean;
   @todosModule.State todos!: Todo[];
-  @todosModule.Action(ActionTypes.fetchTodos) fetchTodos!: Function;
+
   @todosModule.Getter(GetterTypes.DONE_TODOS) doneTodos!: Todo[];
+
+  @todosModule.Action(ActionTypes.fetchTodos) fetchTodos!: Function;
+
+  @todosModule.Mutation(MutationTypes.TOGGLE_TODO)
+  toggleTodo!: (todo: Todo) => void;
 
   created() {
     this.fetchTodos();
@@ -55,6 +61,10 @@ export default class TodoListComponent extends Vue {
 
   get toggleButtonText() {
     return this.showDoneOnly ? "Show all todos" : "Show only done todos";
+  }
+
+  onTodoToggled(todo: Todo) {
+    this.toggleTodo(todo);
   }
 }
 </script>

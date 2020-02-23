@@ -3,17 +3,24 @@ import { createLocalVue, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
 
 import TodoList from '@/components/TodoList.vue';
+import TodoItem from '@/components/TodoItem.vue';
+
 import {
   ActionTypes,
   MODULE_NAME as TODOS_MODULE_NAME,
   initialState,
   getters,
+  MutationTypes,
 } from '@/store/todos';
 import { MOCK_TODOS } from '@/models/todo-items.mock';
 import { RootModuleState } from '@/store';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
+
+const mutations = {
+  [MutationTypes.TOGGLE_TODO]: jest.fn(),
+};
 
 const actions = {
   [ActionTypes.fetchTodos]: jest.fn(() => Promise.resolve(MOCK_TODOS)),
@@ -51,6 +58,7 @@ describe('TodoList.vue', () => {
         [TODOS_MODULE_NAME]: {
           namespaced: true,
           actions,
+          mutations,
           state: {
             loading: false,
             todos: MOCK_TODOS,
@@ -86,5 +94,30 @@ describe('TodoList.vue', () => {
       expect(wrapper.findAll('[data-test="todo-item"]').length).toBe(1);
       done();
     });
+  });
+
+  it('should handle a todo:toggle event from', () => {
+    const storeWithData = new Vuex.Store<RootModuleState>({
+      modules: {
+        [TODOS_MODULE_NAME]: {
+          namespaced: true,
+          actions,
+          mutations,
+          getters,
+          state: {
+            loading: false,
+            todos: MOCK_TODOS,
+          },
+        },
+      },
+    });
+
+    const wrapper = factory({
+      store: storeWithData,
+    });
+
+    wrapper.find(TodoItem).vm.$emit('todo:toggle');
+
+    expect(mutations[MutationTypes.TOGGLE_TODO]).toHaveBeenCalled();
   });
 });

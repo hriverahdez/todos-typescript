@@ -6,6 +6,7 @@ export enum MutationTypes {
   LOAD_TODOS = 'LOAD_TODOS',
   LOAD_TODOS_SUCCESS = 'LOAD_TODOS_SUCCESS',
   LOAD_TODOS_FAIL = 'LOAD_TODOS_FAIL',
+  TOGGLE_TODO = 'TOGGLE_TODO',
   CLEAR_TODOS = 'CLEAR_TODOS',
 }
 
@@ -30,5 +31,9 @@ export const mutations: MutationTree<TodosModuleState> = {
   [MutationTypes.LOAD_TODOS_SUCCESS](state, payload: Todo[]) {
     state.todos = payload;
     state.loading = false;
+  },
+
+  [MutationTypes.TOGGLE_TODO](state, payload: Todo) {
+    state.todos = state.todos.map(t => (t.id === payload.id ? { ...t, isDone: !t.isDone } : t));
   },
 };
